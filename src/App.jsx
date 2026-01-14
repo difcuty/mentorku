@@ -9,7 +9,7 @@ import Register from './pages/auth/Register';
 import DashboardMahasiswa from './pages/mahasiswa/Dashboard';
 import ViewProfile from './pages/mahasiswa/ViewProfile';
 import EditProfile from './pages/mahasiswa/EditProfile';
-import ChatMentorku from './pages/mahasiswa/chat';
+import ChatMahasiswa from './pages/mahasiswa/chat'; // Komponen Chat MHS
 import ChangePassword from './pages/mahasiswa/ChangePassword';
 
 // --- ADMIN PAGES ---
@@ -17,6 +17,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 
 // --- DOSEN PAGES ---
 import DosenDashboard from './pages/dosen/DosenDashboard';
+import ChatDosen from './pages/dosen/chatDosen'; // Komponen Chat DOSEN
 
 /**
  * Komponen Proteksi Rute (Role-Based)
@@ -26,19 +27,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role'); 
 
-  // 1. Jika tidak ada token, paksa ke halaman login
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Jika halaman butuh role tertentu dan user tidak memilikinya
   if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Redirect ke dashboard masing-masing sesuai role yang sah
     if (userRole === 'admin') return <Navigate to="/admin/dashboard" replace />;
     if (userRole === 'dosen') return <Navigate to="/dosen/dashboard" replace />;
     if (userRole === 'mahasiswa') return <Navigate to="/dashboard" replace />;
-    
-    // Fallback jika role tidak dikenal
     return <Navigate to="/login" replace />;
   }
 
@@ -54,7 +50,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* --- ADMIN ROUTES (Hanya Admin) --- */}
+        {/* --- ADMIN ROUTES --- */}
         <Route 
           path="/admin/dashboard" 
           element={
@@ -64,7 +60,7 @@ function App() {
           } 
         />
 
-        {/* --- DOSEN ROUTES (Hanya Dosen) --- */}
+        {/* --- DOSEN ROUTES --- */}
         <Route 
           path="/dosen/dashboard" 
           element={
@@ -73,8 +69,17 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        {/* Rute Chat khusus Dosen */}
+        <Route 
+          path="/dosen/chat" 
+          element={
+            <ProtectedRoute allowedRoles={['dosen']}>
+              <ChatDosen />
+            </ProtectedRoute>
+          } 
+        />
 
-        {/* --- MAHASISWA ROUTES (Hanya Mahasiswa) --- */}
+        {/* --- MAHASISWA ROUTES --- */}
         <Route 
           path="/dashboard" 
           element={
@@ -83,8 +88,17 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        {/* Rute Chat khusus Mahasiswa */}
+        <Route 
+          path="/chat" 
+          element={
+            <ProtectedRoute allowedRoles={['mahasiswa']}>
+              <ChatMahasiswa />
+            </ProtectedRoute>
+          } 
+        />
 
-        {/* --- SHARED PROTECTED ROUTES (Bisa diakses beberapa role) --- */}
+        {/* --- SHARED PROTECTED ROUTES --- */}
         <Route 
           path="/profil" 
           element={
@@ -102,18 +116,10 @@ function App() {
           } 
         />
         <Route 
-          path="/ubah-password" 
+          path="/ubah-sandi" 
           element={
             <ProtectedRoute allowedRoles={['mahasiswa', 'dosen', 'admin']}>
               <ChangePassword />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/chat" 
-          element={
-            <ProtectedRoute allowedRoles={['mahasiswa', 'dosen']}>
-              <ChatMentorku />
             </ProtectedRoute>
           } 
         />
@@ -125,7 +131,7 @@ function App() {
               <span className="text-9xl font-black text-amber-500">404</span>
             </div>
             <h1 className="text-3xl font-black text-slate-800">Ups! Halaman Hilang</h1>
-            <p className="text-slate-500 mt-2 max-w-xs">Halaman yang Anda cari tidak tersedia atau Anda tidak memiliki akses.</p>
+            <p className="text-slate-500 mt-2 max-w-xs">Halaman tidak tersedia atau Anda tidak memiliki akses.</p>
             <button 
               onClick={() => window.history.back()} 
               className="mt-8 bg-slate-800 text-white px-8 py-3 rounded-2xl font-bold hover:bg-slate-700 transition-all shadow-lg active:scale-95"

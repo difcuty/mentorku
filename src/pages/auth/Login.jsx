@@ -6,7 +6,7 @@ import logo from '../../assets/logo.png';
 const Login = () => {
   const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
-    nama: '', // Ini digunakan sebagai field Email di input
+    nama: '', // Email
     kata_sandi: ''
   });
 
@@ -14,34 +14,54 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- LOGIKA LOGIN MULTI-ROLE ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      // Pastikan authService mengirimkan data ke backend: { email: formData.nama, password: formData.kata_sandi }
       const result = await loginUser({
         email: formData.nama,
         password: formData.kata_sandi
       });
-      
-      // 1. Simpan Data ke localStorage
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('role', result.role); // Simpan role (admin/dosen/mahasiswa)
-      localStorage.setItem('user', JSON.stringify(result.user));
 
-      alert(`Login Berhasil! Selamat Datang, ${result.user.nama}.`);
+      // Debugging: Lihat struktur data di console browser (F12)
+      console.log("Login Result:", result);
+
+      /**
+       * Berdasarkan controller sebelumnya, data role ada di dalam 'user'
+       * atau langsung di 'role'. Kita ambil dengan fallback aman.
+       */
+      const userData = result.user;
+      const userRole = result.role || userData?.role;
+      const userId = userData?.id_user;
+
+      if (!userRole) {
+        throw new Error("Role user tidak ditemukan dalam sistem.");
+      }
+
+      // 1. Simpan Data ke localStorage (PENTING UNTUK CHAT & AUTH)
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('role', userRole); 
+      localStorage.setItem('userId', userId); 
+      localStorage.setItem('userName', userData?.nama || 'User');
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      alert(`Login Berhasil! Selamat Datang, ${userData?.nama || ''}.`);
       
       // 2. Redirect Berdasarkan Role
-      if (result.role === 'admin') {
+      // Gunakan userRole yang sudah kita ekstrak di atas
+      if (userRole === 'admin') {
         navigate('/admin/dashboard');
-      } else if (result.role === 'dosen') {
+      } else if (userRole === 'dosen') {
         navigate('/dosen/dashboard');
+      } else if (userRole === 'mahasiswa') {
+        navigate('/dashboard');
       } else {
-        navigate('/dashboard'); // Dashboard untuk mahasiswa
+        // Jika role tidak dikenal, lempar ke dashboard utama
+        navigate('/dashboard');
       }
       
     } catch (error) {
+      console.error("Login Error Details:", error);
       alert(error.message || "Gagal masuk. Periksa kembali email dan kata sandi Anda.");
     }
   };
@@ -66,13 +86,12 @@ const Login = () => {
           </h1>
           
           <form onSubmit={handleSubmit} className="w-full space-y-6 max-w-md"> 
-            {/* Input Email */}
             <div className="bg-[#4db6ac] rounded-full px-5 py-3 flex items-center transition-transform focus-within:scale-[1.02] shadow-sm">
               <svg className="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
               <input 
-                type="email" // Ubah ke type email untuk validasi browser
+                type="email" 
                 name="nama"
                 value={formData.nama}
                 onChange={handleChange}
@@ -82,7 +101,6 @@ const Login = () => {
               />
             </div>
 
-            {/* Input Password */}
             <div className="bg-[#4db6ac] rounded-full px-5 py-3 flex items-center transition-transform focus-within:scale-[1.02] shadow-sm">
               <svg className="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z"></path>

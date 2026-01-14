@@ -66,7 +66,7 @@ const SidebarDosen = ({ isSidebarOpen, toggleSidebar, isProfilOpen, toggleProfil
             </div>
           </div>
           
-          <Link to="/chat" className="flex items-center p-4 border-b border-gray-300 hover:bg-gray-200 hover:pl-8 transition-all duration-300 relative group">
+          <Link to="/dosen/chat" className="flex items-center p-4 border-b border-gray-300 hover:bg-gray-200 hover:pl-8 transition-all duration-300 relative group">
             <div className="absolute left-0 top-0 h-full w-1 bg-[#46678c] opacity-0 group-hover:opacity-100 transition-opacity" />
             <img src={chatIcon} alt="Chat" className="w-6 h-6 object-contain" />
             <span className="ml-4">chat mentorku</span>

@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Tambahkan useNavigate
-import { registerUser } from '../../services/authService'; // Impor service
+import { Link, useNavigate } from 'react-router-dom';
+// Update import: sesuaikan dengan nama fungsi baru di authService
+import { registerMahasiswa } from '../../services/authService'; 
 import logo from '../../assets/logo.png';
 
 const Register = () => {
-  const navigate = useNavigate(); // Untuk pindah halaman setelah sukses
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nama_lengkap: '',
     email: '',
     password: '',
-    confirm_password: ''
+    confirm_password: '',
+    npm: '' // Tambahkan field NPM jika ingin mendukung data mahasiswa lengkap
   });
 
   const handleChange = (e) => {
@@ -30,8 +32,8 @@ const Register = () => {
     }
 
     try {
-      // Panggil Service
-      const result = await registerUser(formData);
+      // Panggil Service dengan nama fungsi yang baru: registerMahasiswa
+      const result = await registerMahasiswa(formData);
       
       alert(result.message || "Registrasi Berhasil!");
       
@@ -90,6 +92,19 @@ const Register = () => {
                 className="bg-[#4db6ac] text-white placeholder:text-white/80 p-3 rounded-full w-full outline-none border-2 border-transparent focus:border-[#26a69a] transition-all" 
                 placeholder="email@contoh.com"
                 required
+              />
+            </div>
+
+            {/* Opsional: Tambahkan input NPM jika perlu */}
+            <div>
+              <label className="text-black font-semibold text-sm block mb-1 ml-4">NPM (Opsional)</label>
+              <input 
+                type="text" 
+                name="npm"
+                value={formData.npm}
+                onChange={handleChange}
+                className="bg-[#4db6ac] text-white placeholder:text-white/80 p-3 rounded-full w-full outline-none border-2 border-transparent focus:border-[#26a69a] transition-all" 
+                placeholder="Masukkan NPM Anda"
               />
             </div>
 
